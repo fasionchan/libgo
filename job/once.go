@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2019-05-10 16:28:38
  * Last Modified by: fasion
- * Last Modified time: 2019-06-06 22:15:01
+ * Last Modified time: 2020-04-23 09:11:42
  */
 
 package job
@@ -20,29 +20,33 @@ type OnceJob interface {
 }
 
 type OnceJobRunner struct {
-	mutexChan		chan struct{}
-	enterChan 		chan struct{}
-	exitChan 		chan struct{}
+	mutexChan chan struct{}
+	enterChan chan struct{}
+	exitChan  chan struct{}
 
-	job 			OnceJob
+	job OnceJob
 }
 
 func NewOnceJobRunner(job OnceJob) (*OnceJobRunner, error) {
 	return &OnceJobRunner{
-		mutexChan:			make(chan struct{}, 1),
-		enterChan:			make(chan struct{}),
-		exitChan: 			make(chan struct{}),
+		mutexChan: make(chan struct{}, 1),
+		enterChan: make(chan struct{}),
+		exitChan:  make(chan struct{}),
 
-		job: 				job,
+		job: job,
 	}, nil
 }
 
-func (self *OnceJobRunner) Start() (error) {
+func (self *OnceJobRunner) RunForever() {
+	self.job.Process()
+}
+
+func (self *OnceJobRunner) Start() error {
 	self.mutexChan <- struct{}{}
 
 	select {
-	case <- self.enterChan:
-		<- self.mutexChan
+	case <-self.enterChan:
+		<-self.mutexChan
 		return JOB_ERROR_REENTRY
 	default:
 	}
@@ -52,39 +56,39 @@ func (self *OnceJobRunner) Start() (error) {
 
 	// can not enter job group
 	if !jg.Enter(ctx) {
-		<- self.mutexChan
+		<-self.mutexChan
 		return JOB_GROUP_FULL
 	}
 
 	go func() {
 		close(self.enterChan)
-		<- self.mutexChan
+		<-self.mutexChan
 
 		defer close(self.exitChan)
 		defer jg.Exit()
 
 		// TODO
 		// what about panic
-		self.job.Process()
+		self.RunForever()
 	}()
 
 	return nil
 }
 
-func (self *OnceJobRunner) Shutdown() (error) {
+func (self *OnceJobRunner) Shutdown() error {
 	self.job.Cancel()
 	return nil
 }
 
-func (self *OnceJobRunner) Join() (error) {
+func (self *OnceJobRunner) Join() error {
 	select {
-	case <- self.exitChan:
+	case <-self.exitChan:
 	}
 
 	return nil
 }
 
-func (self *OnceJobRunner) Stop() (error) {
+func (self *OnceJobRunner) Stop() error {
 	if err := self.Shutdown(); err != nil {
 		return err
 	}

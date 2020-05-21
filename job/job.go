@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2019-05-10 16:40:29
  * Last Modified by: fasion
- * Last Modified time: 2019-10-31 09:30:58
+ * Last Modified time: 2020-04-23 09:10:33
  */
 
 package job
@@ -14,6 +14,7 @@ import (
 )
 
 type JobRunner interface {
+	RunForever()
 	Start() error
 	Shutdown() error
 	Join() error
@@ -132,6 +133,15 @@ func (self *BaseJob) IsCanceled() bool {
 		return true
 	default:
 		return false
+	}
+}
+
+func (base *BaseJob) Sleep(interval time.Duration) bool {
+	select {
+	case <-base.GetContext().Done():
+		return false
+	case <-time.After(interval):
+		return true
 	}
 }
 

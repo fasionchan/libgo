@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2019-05-10 16:28:38
  * Last Modified by: fasion
- * Last Modified time: 2019-09-10 13:47:17
+ * Last Modified time: 2020-04-16 09:44:54
  */
 
 package job
@@ -10,22 +10,22 @@ package job
 type RepeatJob interface {
 	Job
 
-	Prepare() (bool)
-	Process() (bool)
+	Prepare() bool
+	Process() bool
 	Cleanup()
 }
 
 type RepeatJobRunner struct {
 	JobRunner
-	Job
+	RepeatJob
 
-	job 			RepeatJob
+	// job RepeatJob
 }
 
 func NewRepeatJobRunner(job RepeatJob) (*RepeatJobRunner, error) {
 	runner := RepeatJobRunner{
-		Job: job,
-		job: job,
+		RepeatJob: job,
+		// job: job,
 	}
 
 	onceRunner, err := NewOnceJobRunner(&runner)
@@ -38,26 +38,26 @@ func NewRepeatJobRunner(job RepeatJob) (*RepeatJobRunner, error) {
 	return &runner, nil
 }
 
-func (self *RepeatJobRunner) Process() {
+func (runner *RepeatJobRunner) Process() {
 	// call prepare
-	if self.job.IsCanceled() {
+	if runner.RepeatJob.IsCanceled() {
 		return
 	}
-	if !self.job.Prepare() {
+	if !runner.RepeatJob.Prepare() {
 		return
 	}
 
 	// call process repeatly
 	for {
-		if self.job.IsCanceled() {
+		if runner.RepeatJob.IsCanceled() {
 			break
 		}
 
-		if !self.job.Process() {
+		if !runner.RepeatJob.Process() {
 			break
 		}
 	}
 
 	// call clean up
-	self.job.Cleanup()
+	runner.RepeatJob.Cleanup()
 }

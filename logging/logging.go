@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2019-05-13 09:40:16
  * Last Modified by: fasion
- * Last Modified time: 2019-12-11 14:52:24
+ * Last Modified time: 2020-04-07 13:56:34
  */
 
 package logging
@@ -54,13 +54,13 @@ var encoderConfig = zapcore.EncoderConfig{
 	EncodeCaller:   zapcore.ShortCallerEncoder,
 }
 
-type KeeperLoggerContext struct {
+type LoggerContainer struct {
 	loggerLevel zap.AtomicLevel
 	logger      *zap.Logger
 	writeSyncer *DynamicWriteSyncer
 }
 
-func CreateKeeperLoggerContextWithStdout() *KeeperLoggerContext {
+func NewLoggerContainerWithStdout() *LoggerContainer {
 	// default log level
 	loggerLevel := zap.NewAtomicLevelAt(zapcore.InfoLevel)
 
@@ -81,41 +81,41 @@ func CreateKeeperLoggerContextWithStdout() *KeeperLoggerContext {
 	// logger
 	logger := zap.New(core)
 
-	return &KeeperLoggerContext{
+	return &LoggerContainer{
 		loggerLevel: loggerLevel,
 		logger:      logger,
 		writeSyncer: writeSyncer,
 	}
 }
 
-func (klc *KeeperLoggerContext) GetLogger() *zap.Logger {
-	return klc.logger
+func (container *LoggerContainer) GetLogger() *zap.Logger {
+	return container.logger
 }
 
-func (klc *KeeperLoggerContext) SetLoggerLevel(level zapcore.Level) {
-	klc.loggerLevel.SetLevel(level)
+func (container *LoggerContainer) SetLoggerLevel(level zapcore.Level) {
+	container.loggerLevel.SetLevel(level)
 }
 
-func (klc *KeeperLoggerContext) UseCustomWriteSyncer(ws zapcore.WriteSyncer, closer CloserFunc) error {
-	return klc.writeSyncer.Update(ws, closer)
+func (container *LoggerContainer) UseCustomWriteSyncer(ws zapcore.WriteSyncer, closer CloserFunc) error {
+	return container.writeSyncer.Update(ws, closer)
 }
 
-func (klc *KeeperLoggerContext) UseCustomWriter(w io.Writer) error {
-	return klc.UseCustomWriteSyncer(zapcore.AddSync(w), nil)
+func (container *LoggerContainer) UseCustomWriter(w io.Writer) error {
+	return container.UseCustomWriteSyncer(zapcore.AddSync(w), nil)
 }
 
-func (klc *KeeperLoggerContext) UseCustomWriteCloser(wc io.WriteCloser) error {
-	return klc.UseCustomWriteSyncer(zapcore.AddSync(wc), wc.Close)
+func (container *LoggerContainer) UseCustomWriteCloser(wc io.WriteCloser) error {
+	return container.UseCustomWriteSyncer(zapcore.AddSync(wc), wc.Close)
 }
 
-func (klc *KeeperLoggerContext) UseCustomFileWriteSyncer(path string, maxSize, maxAge, maxBackups int, localTime, compress bool) error {
+func (container *LoggerContainer) UseCustomFileWriteSyncer(path string, maxSize, maxAge, maxBackups int, localTime, compress bool) error {
 	// create parent directories
 	err := os.MkdirAll(filepath.Dir(path), 0755)
 	if err != nil {
 		return err
 	}
 
-	return klc.UseCustomWriteCloser(&lumberjack.Logger{
+	return container.UseCustomWriteCloser(&lumberjack.Logger{
 		Filename:   path,
 		MaxSize:    maxSize,
 		MaxAge:     maxAge,
@@ -125,8 +125,8 @@ func (klc *KeeperLoggerContext) UseCustomFileWriteSyncer(path string, maxSize, m
 	})
 }
 
-func (klc *KeeperLoggerContext) UseFileWriteSyncer(path string) error {
-	return klc.UseCustomFileWriteSyncer(
+func (container *LoggerContainer) UseFileWriteSyncer(path string) error {
+	return container.UseCustomFileWriteSyncer(
 		// path
 		path,
 		// max size in megabytes
@@ -142,7 +142,7 @@ func (klc *KeeperLoggerContext) UseFileWriteSyncer(path string) error {
 	)
 }
 
-var keeperLoggerContext = CreateKeeperLoggerContextWithStdout()
+var loggerContainer = NewLoggerContainerWithStdout()
 
-var GetLogger = keeperLoggerContext.GetLogger
-var SetLoggerLevel = keeperLoggerContext.SetLoggerLevel
+var GetLogger = loggerContainer.GetLogger
+var SetLoggerLevel = loggerContainer.SetLoggerLevel

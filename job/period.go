@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2019-05-13 13:50:47
  * Last Modified by: fasion
- * Last Modified time: 2019-10-31 10:50:34
+ * Last Modified time: 2020-09-08 16:46:49
  */
 
 package job
@@ -57,60 +57,60 @@ func NewPeriodJobRunner(job PeriodJob, interval time.Duration, offset time.Durat
 	return &runner, nil
 }
 
-func (self *PeriodJobRunner) Process() {
+func (runner *PeriodJobRunner) Process() {
 	// call prepare
-	if self.job.IsCanceled() {
+	if runner.job.IsCanceled() {
 		return
 	}
-	if !self.job.Prepare() {
+	if !runner.job.Prepare() {
 		return
 	}
 
 	curTime := time.Now()
 
 	// initialize next executing time
-	if self.align && self.strictAlign {
-		self.nextTickTime = alignNextTime(curTime, self.interval, self.offset)
+	if runner.align && runner.strictAlign {
+		runner.nextTickTime = alignNextTime(curTime, runner.interval, runner.offset)
 	} else {
-		self.nextTickTime = curTime
+		runner.nextTickTime = curTime
 	}
 
 PERIOD_RUNNER_LOOP:
 	for {
 		curTime = time.Now()
 
-		if curTime.Before(self.nextTickTime) {
+		if curTime.Before(runner.nextTickTime) {
 			// not right now, waiting
-			waitDuration := self.nextTickTime.Sub(curTime)
-			if self.align && waitDuration > self.interval {
-				self.nextTickTime = alignNextTime(curTime, self.interval, self.offset)
+			waitDuration := runner.nextTickTime.Sub(curTime)
+			if runner.align && waitDuration > runner.interval {
+				runner.nextTickTime = alignNextTime(curTime, runner.interval, runner.offset)
 				continue
 			}
 
 			select {
 			case <-time.After(waitDuration):
-			case <-self.job.GetContext().Done():
+			case <-runner.job.GetContext().Done():
 				break PERIOD_RUNNER_LOOP
 			}
 		} else {
-			if self.job.IsCanceled() {
+			if runner.job.IsCanceled() {
 				break
 			}
-			if !self.job.Process() {
+			if !runner.job.Process() {
 				break
 			}
 
 			// calculate next executing time
-			if self.align {
-				self.nextTickTime = alignNextTime(curTime, self.interval, self.offset)
+			if runner.align {
+				runner.nextTickTime = alignNextTime(curTime, runner.interval, runner.offset)
 			} else {
-				self.nextTickTime = self.nextTickTime.Add(self.interval)
+				runner.nextTickTime = runner.nextTickTime.Add(runner.interval)
 			}
 		}
 	}
 
 	// call clean up
-	self.job.Cleanup()
+	runner.job.Cleanup()
 }
 
 func alignNextTimeSmart(base time.Time, interval time.Duration, offset time.Duration) time.Time {

@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2019-05-10 16:40:29
  * Last Modified by: fasion
- * Last Modified time: 2020-04-23 09:10:33
+ * Last Modified time: 2020-09-08 16:44:20
  */
 
 package job
@@ -34,20 +34,20 @@ func NewJobGroup(tokens int, enterWait time.Duration) *JobGroup {
 	}
 }
 
-func (self *JobGroup) Enter(ctx context.Context) bool {
-	if self == nil {
+func (group *JobGroup) Enter(ctx context.Context) bool {
+	if group == nil {
 		return true
 	}
 
-	if self.tokens == nil {
-		self.wg.Add(1)
+	if group.tokens == nil {
+		group.wg.Add(1)
 		return true
 	}
 
-	if self.enterWait == 0 {
+	if group.enterWait == 0 {
 		select {
-		case self.tokens <- struct{}{}:
-			self.wg.Add(1)
+		case group.tokens <- struct{}{}:
+			group.wg.Add(1)
 			return true
 		default:
 			return false
@@ -55,34 +55,34 @@ func (self *JobGroup) Enter(ctx context.Context) bool {
 	}
 
 	select {
-	case self.tokens <- struct{}{}:
-		self.wg.Add(1)
+	case group.tokens <- struct{}{}:
+		group.wg.Add(1)
 		return true
 	case <-ctx.Done():
 		return false
-	case <-time.After(self.enterWait):
+	case <-time.After(group.enterWait):
 		return false
 	}
 }
 
-func (self *JobGroup) Exit() {
-	if self == nil {
+func (group *JobGroup) Exit() {
+	if group == nil {
 		return
 	}
 
-	self.wg.Done()
+	group.wg.Done()
 
-	if self.tokens != nil {
-		<-self.tokens
+	if group.tokens != nil {
+		<-group.tokens
 	}
 }
 
-func (self *JobGroup) Wait() {
-	if self == nil {
+func (group *JobGroup) Wait() {
+	if group == nil {
 		return
 	}
 
-	self.wg.Wait()
+	group.wg.Wait()
 }
 
 type Job interface {
@@ -115,40 +115,40 @@ func (job *BaseJob) GetJobIdent() string {
 	return job.ident
 }
 
-func (self *BaseJob) GetJobGroup() *JobGroup {
+func (job *BaseJob) GetJobGroup() *JobGroup {
 	return nil
 }
 
-func (self *BaseJob) GetContext() context.Context {
-	return self.ctx
+func (job *BaseJob) GetContext() context.Context {
+	return job.ctx
 }
 
-func (self *BaseJob) Cancel() {
-	self.cancel()
+func (job *BaseJob) Cancel() {
+	job.cancel()
 }
 
-func (self *BaseJob) IsCanceled() bool {
+func (job *BaseJob) IsCanceled() bool {
 	select {
-	case <-self.ctx.Done():
+	case <-job.ctx.Done():
 		return true
 	default:
 		return false
 	}
 }
 
-func (base *BaseJob) Sleep(interval time.Duration) bool {
+func (job *BaseJob) Sleep(interval time.Duration) bool {
 	select {
-	case <-base.GetContext().Done():
+	case <-job.GetContext().Done():
 		return false
 	case <-time.After(interval):
 		return true
 	}
 }
 
-func (self *BaseJob) OnError(err error) {
-	self.lastErr = err
+func (job *BaseJob) OnError(err error) {
+	job.lastErr = err
 }
 
-func (self *BaseJob) GetLastError() error {
-	return self.lastErr
+func (job *BaseJob) GetLastError() error {
+	return job.lastErr
 }

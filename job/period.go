@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2019-05-13 13:50:47
  * Last Modified by: fasion
- * Last Modified time: 2020-09-08 16:46:49
+ * Last Modified time: 2020-11-24 14:59:45
  */
 
 package job
@@ -12,21 +12,18 @@ import (
 )
 
 type PeriodJob interface {
-	Job
-
-	Prepare() bool
-	Process() bool
-	Cleanup()
+	RepeatJob
 }
 
 type PeriodJobRunner struct {
 	JobRunner
 	Job
 
-	interval    time.Duration
-	offset      time.Duration
-	align       bool
-	strictAlign bool
+	interval         time.Duration
+	offset           time.Duration
+	align            bool
+	strictAlign      bool
+	rescheduleSignal chan struct{}
 
 	job PeriodJob
 
@@ -39,12 +36,13 @@ func NewPeriodJobRunner(job PeriodJob, interval time.Duration, offset time.Durat
 	}
 
 	runner := PeriodJobRunner{
-		Job:         job,
-		interval:    interval,
-		offset:      offset,
-		align:       align,
-		strictAlign: strictAlign,
-		job:         job,
+		Job:              job,
+		interval:         interval,
+		rescheduleSignal: make(chan struct{}),
+		offset:           offset,
+		align:            align,
+		strictAlign:      strictAlign,
+		job:              job,
 	}
 
 	onceRunner, err := NewOnceJobRunner(&runner)
@@ -57,6 +55,18 @@ func NewPeriodJobRunner(job PeriodJob, interval time.Duration, offset time.Durat
 	return &runner, nil
 }
 
+func (runner *PeriodJobRunner) SetInterval(interval time.Duration) {
+	runner.interval = interval
+}
+
+func (runner *PeriodJobRunner) Reschedule() {
+	// run in new coroutine in order to avoid deal lock
+	// when called by runner routine
+	go func() {
+		runner.rescheduleSignal <- struct{}{}
+	}()
+}
+
 func (runner *PeriodJobRunner) Process() {
 	// call prepare
 	if runner.job.IsCanceled() {
@@ -65,6 +75,8 @@ func (runner *PeriodJobRunner) Process() {
 	if !runner.job.Prepare() {
 		return
 	}
+
+START_SCHEDULING:
 
 	curTime := time.Now()
 
@@ -88,6 +100,8 @@ PERIOD_RUNNER_LOOP:
 			}
 
 			select {
+			case <-runner.rescheduleSignal:
+				goto START_SCHEDULING
 			case <-time.After(waitDuration):
 			case <-runner.job.GetContext().Done():
 				break PERIOD_RUNNER_LOOP
@@ -110,7 +124,7 @@ PERIOD_RUNNER_LOOP:
 	}
 
 	// call clean up
-	runner.job.Cleanup()
+	runner.job.CleanUp()
 }
 
 func alignNextTimeSmart(base time.Time, interval time.Duration, offset time.Duration) time.Time {
@@ -119,5 +133,9 @@ func alignNextTimeSmart(base time.Time, interval time.Duration, offset time.Dura
 }
 
 func alignNextTime(base time.Time, interval time.Duration, offset time.Duration) time.Time {
-	return base.Truncate(interval).Add(interval).Add(offset)
+	result := base.Truncate(interval).Add(offset)
+	for result.Before(base) {
+		result = result.Add(interval)
+	}
+	return result
 }

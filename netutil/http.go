@@ -2,10 +2,10 @@
  * Author: fasion
  * Created time: 2019-06-25 18:36:42
  * Last Modified by: fasion
- * Last Modified time: 2019-06-25 18:39:15
+ * Last Modified time: 2021-01-29 09:48:48
  */
 
-package net
+package netutil
 
 import (
 	"fmt"
@@ -14,8 +14,8 @@ import (
 	"os"
 )
 
-func DownloadFile(url, dst string) (error) {
-	out, err := os.OpenFile(dst, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0700)
+func DownloadFile(url, dst string) error {
+	out, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0700)
 	if err != nil {
 		return err
 	}

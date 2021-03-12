@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2019-05-10 16:28:38
  * Last Modified by: fasion
- * Last Modified time: 2020-04-16 09:44:54
+ * Last Modified time: 2020-09-23 20:02:29
  */
 
 package job
@@ -12,7 +12,7 @@ type RepeatJob interface {
 
 	Prepare() bool
 	Process() bool
-	Cleanup()
+	CleanUp()
 }
 
 type RepeatJobRunner struct {
@@ -59,5 +59,5 @@ func (runner *RepeatJobRunner) Process() {
 	}
 
 	// call clean up
-	runner.RepeatJob.Cleanup()
+	runner.RepeatJob.CleanUp()
 }

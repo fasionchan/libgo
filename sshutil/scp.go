@@ -2,10 +2,10 @@
  * Author: fasion
  * Created time: 2019-09-17 17:26:20
  * Last Modified by: fasion
- * Last Modified time: 2019-11-06 10:21:38
+ * Last Modified time: 2020-11-06 11:09:07
  */
 
-package ssh
+package sshutil
 
 import (
 	"bytes"
@@ -35,23 +35,28 @@ func CopyTo(client *ssh.Client, content io.Reader, size int64, path, name string
 	if err != nil {
 		return err
 	}
+	defer stdin.Close()
 
 	cmd := shellquote.Join("scp", "-t", path)
 	if err := session.Start(cmd); err != nil {
-		stdin.Close()
 		return err
 	}
 
-	errors := make(chan error)
+	errors := make(chan error, 1)
 	go func() {
 		errors <- session.Wait()
 	}()
 
 	// feed content
-	fmt.Fprintf(stdin, "C%#o %d %s\n", mode, size, name)
-	io.Copy(stdin, content)
-	fmt.Fprint(stdin, "\x00")
-	stdin.Close()
+	if _, err := fmt.Fprintf(stdin, "C%#o %d %s\n", mode, size, name); err != nil {
+		return err
+	}
+	if _, err := io.Copy(stdin, content); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprint(stdin, "\x00"); err != nil {
+		return err
+	}
 
 	return <-errors
 }

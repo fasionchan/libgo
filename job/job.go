@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2019-05-10 16:40:29
  * Last Modified by: fasion
- * Last Modified time: 2020-09-08 16:44:20
+ * Last Modified time: 2021-03-24 13:42:12
  */
 
 package job
@@ -11,6 +11,9 @@ import (
 	"context"
 	"sync"
 	"time"
+
+	"github.com/fasionchan/libgo/logging"
+	"go.uber.org/zap"
 )
 
 type JobRunner interface {
@@ -95,6 +98,7 @@ type Job interface {
 }
 
 type BaseJob struct {
+	*zap.Logger
 	ident  string
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -105,6 +109,7 @@ type BaseJob struct {
 func NewBaseJob(ident string) BaseJob {
 	ctx, cancel := context.WithCancel(context.Background())
 	return BaseJob{
+		Logger: logging.GetLogger().Named(ident),
 		ident:  ident,
 		ctx:    ctx,
 		cancel: cancel,

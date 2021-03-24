@@ -2,20 +2,44 @@
  * Author: fasion
  * Created time: 2021-02-09 10:16:51
  * Last Modified by: fasion
- * Last Modified time: 2021-03-11 17:03:40
+ * Last Modified time: 2021-03-18 14:29:09
  */
 
 package goutil
 
 import (
 	"sort"
+	"strings"
 )
 
 type StringSlice []string
 
+func (ss StringSlice) Strings() []string {
+	result := make([]string, 0, len(ss))
+	for _, s := range ss {
+		result = append(result, s)
+	}
+	return result
+}
+
+func (ss StringSlice) Join(sep string) string {
+	return strings.Join(ss.Strings(), sep)
+}
+
 func (ss StringSlice) Dup() StringSlice {
 	dup := make(StringSlice, 0, len(ss))
 	return append(dup, ss...)
+}
+
+func (ss StringSlice) Append(s ...string) StringSlice {
+	return append(ss, s...)
+}
+
+func (ss StringSlice) Concat(others ...StringSlice) StringSlice {
+	for _, other := range others {
+		ss = ss.Append(other...)
+	}
+	return ss
 }
 
 func (ss StringSlice) Len() int {
@@ -37,6 +61,20 @@ func (ss StringSlice) InplaceSort() StringSlice {
 
 func (ss StringSlice) Sort() StringSlice {
 	return ss.Dup().InplaceSort()
+}
+
+func (ss StringSlice) Unique() StringSlice {
+	result := make(StringSlice, 0, len(ss))
+
+	var last string
+	for i, s := range ss {
+		if i == 0 || s != last {
+			result = append(result, s)
+			last = s
+		}
+	}
+
+	return result
 }
 
 func (ss StringSlice) Equal(other StringSlice) bool {
@@ -105,4 +143,8 @@ func StringSliceDifferenceSet(a, b []string) []string {
 		}
 	}
 	return result
+}
+
+func NewStringSlice(ss []string) StringSlice {
+	return StringSlice(ss)
 }

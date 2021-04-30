@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-02-09 10:16:51
  * Last Modified by: fasion
- * Last Modified time: 2021-03-18 14:29:09
+ * Last Modified time: 2021-04-26 13:36:44
  */
 
 package goutil
@@ -13,6 +13,14 @@ import (
 )
 
 type StringSlice []string
+
+func NewStringSlice(ss []string) StringSlice {
+	return StringSlice(ss)
+}
+
+func (ss StringSlice) ToSet() StringSet {
+	return NewStringSet(ss...)
+}
 
 func (ss StringSlice) Strings() []string {
 	result := make([]string, 0, len(ss))
@@ -145,6 +153,113 @@ func StringSliceDifferenceSet(a, b []string) []string {
 	return result
 }
 
-func NewStringSlice(ss []string) StringSlice {
-	return StringSlice(ss)
+type StringSet map[string]bool
+
+func NewStringSet(ss ...string) StringSet {
+	set := StringSet{}
+	for _, s := range ss {
+		set[s] = true
+	}
+	return set
 }
+
+func (set StringSet) Dup() StringSet {
+	result := StringSet{}
+	for s := range set {
+		result[s] = true
+	}
+	return result
+}
+
+func (set StringSet) ToSlice() StringSlice {
+	slice := make(StringSlice, 0, len(set))
+	for s := range set {
+		slice = slice.Append(s)
+	}
+	return slice
+}
+
+func (a StringSet) Equal(b StringSet) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for s := range a {
+		if !b.Contain(s) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (set StringSet) Contain(s string) (ok bool) {
+	_, ok = set[s]
+	return
+}
+
+func (set StringSet) AddStrings(ss ...string) StringSet {
+	for _, s := range ss {
+		set[s] = true
+	}
+	return set
+}
+
+func (a StringSet) Add(b StringSet) StringSet {
+	for s := range b {
+		a[s] = true
+	}
+	return a
+}
+
+func (a StringSet) Sub(b StringSet) StringSet {
+	result := StringSet{}
+	for s := range a {
+		if !b.Contain(s) {
+			result[s] = true
+		}
+	}
+	return result
+}
+
+func (a StringSet) Union(b StringSet) StringSet {
+	result := a.Dup()
+	for s := range b {
+		result.AddStrings(s)
+	}
+	return result
+}
+
+func (a StringSet) Difference(b StringSet) StringSet {
+	return a.Dup().Sub(b)
+}
+
+func (a StringSet) SymmetricDifference(b StringSet) StringSet {
+	result := StringSet{}
+
+	for s := range a {
+		if !b.Contain(s) {
+			result[s] = true
+		}
+	}
+
+	for s := range b {
+		if !a.Contain(s) {
+			result[s] = true
+		}
+	}
+
+	return result
+}
+
+func (a StringSet) Intersection(b StringSet) StringSet {
+	result := StringSet{}
+	for s := range a {
+		if b.Contain(s) {
+			result[s] = true
+		}
+	}
+	return result
+}
+
+type StringSets []StringSet

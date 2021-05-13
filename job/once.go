@@ -2,13 +2,15 @@
  * Author: fasion
  * Created time: 2019-05-10 16:28:38
  * Last Modified by: fasion
- * Last Modified time: 2020-09-08 16:42:49
+ * Last Modified time: 2021-05-13 13:16:38
  */
 
 package job
 
 import (
 	"fmt"
+
+	"go.uber.org/zap"
 )
 
 var JOB_ERROR_REENTRY = fmt.Errorf("job reentry")
@@ -20,6 +22,8 @@ type OnceJob interface {
 }
 
 type OnceJobRunner struct {
+	*zap.Logger
+
 	mutexChan chan struct{}
 	enterChan chan struct{}
 	exitChan  chan struct{}
@@ -28,7 +32,14 @@ type OnceJobRunner struct {
 }
 
 func NewOnceJobRunner(job OnceJob) (*OnceJobRunner, error) {
+	logger := job.GetLoggerForRunner()
+	if logger == nil {
+		logger = Logger
+	}
+
 	return &OnceJobRunner{
+		Logger: logger,
+
 		mutexChan: make(chan struct{}, 1),
 		enterChan: make(chan struct{}),
 		exitChan:  make(chan struct{}),

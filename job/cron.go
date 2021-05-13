@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-03-10 09:19:12
  * Last Modified by: fasion
- * Last Modified time: 2021-03-10 10:26:05
+ * Last Modified time: 2021-05-13 11:17:30
  */
 
 package job
@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/robfig/cron/v3"
+	"go.uber.org/zap"
 )
 
 type CronJob interface {
@@ -65,6 +66,11 @@ CRON_RUNNER_LOOP:
 	for {
 		curTime := time.Now()
 		runner.nextTickTime = runner.schedule.Next(runner.lastTickTime)
+
+		runner.Info("CronRunnerScheduling",
+			zap.String("Ident", runner.job.GetJobIdent()),
+			zap.Time("NextTime", runner.nextTickTime),
+		)
 
 		if curTime.Before(runner.nextTickTime) {
 			// not right now, waiting

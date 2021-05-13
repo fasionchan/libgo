@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2019-05-10 16:40:29
  * Last Modified by: fasion
- * Last Modified time: 2021-03-24 13:42:12
+ * Last Modified time: 2021-05-13 13:17:08
  */
 
 package job
@@ -16,7 +16,17 @@ import (
 	"go.uber.org/zap"
 )
 
+var Logger = logging.GetLogger().Named("JobRunner")
+
 type JobRunner interface {
+	DPanic(msg string, fields ...zap.Field)
+	Debug(msg string, fields ...zap.Field)
+	Error(msg string, fields ...zap.Field)
+	Fatal(msg string, fields ...zap.Field)
+	Info(msg string, fields ...zap.Field)
+	Panic(msg string, fields ...zap.Field)
+	Warn(msg string, fields ...zap.Field)
+
 	RunForever()
 	Start() error
 	Shutdown() error
@@ -89,6 +99,8 @@ func (group *JobGroup) Wait() {
 }
 
 type Job interface {
+	GetLoggerForRunner() *zap.Logger
+	GetJobIdent() string
 	GetJobGroup() *JobGroup
 	GetContext() context.Context
 	Cancel()
@@ -122,6 +134,10 @@ func (job *BaseJob) GetJobIdent() string {
 
 func (job *BaseJob) GetJobGroup() *JobGroup {
 	return nil
+}
+
+func (job *BaseJob) GetLoggerForRunner() *zap.Logger {
+	return job.Logger
 }
 
 func (job *BaseJob) GetContext() context.Context {

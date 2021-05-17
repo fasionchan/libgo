@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-02-09 10:16:51
  * Last Modified by: fasion
- * Last Modified time: 2021-04-26 13:36:44
+ * Last Modified time: 2021-05-14 19:00:31
  */
 
 package goutil
@@ -169,6 +169,14 @@ func (set StringSet) Dup() StringSet {
 		result[s] = true
 	}
 	return result
+}
+
+func (set StringSet) Len() int {
+	return len(set)
+}
+
+func (set StringSet) Empty() bool {
+	return set.Len() == 0
 }
 
 func (set StringSet) ToSlice() StringSlice {

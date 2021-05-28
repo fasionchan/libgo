@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-02-09 10:16:51
  * Last Modified by: fasion
- * Last Modified time: 2021-05-14 19:00:31
+ * Last Modified time: 2021-05-28 08:49:31
  */
 
 package goutil
@@ -23,11 +23,60 @@ func (ss StringSlice) ToSet() StringSet {
 }
 
 func (ss StringSlice) Strings() []string {
-	result := make([]string, 0, len(ss))
+	return []string(ss)
+	// result := make([]string, 0, len(ss))
+	// for _, s := range ss {
+	// 	result = append(result, s)
+	// }
+	// return result
+}
+
+func (ss StringSlice) Map(f func(string) string) StringSlice {
+	for i, s := range ss {
+		ss[i] = f(s)
+	}
+	return ss
+}
+
+func (ss StringSlice) Filter(f func(string) bool) StringSlice {
+	result := make(StringSlice, 0, len(ss))
 	for _, s := range ss {
-		result = append(result, s)
+		if f(s) {
+			result = result.Append(s)
+		}
 	}
 	return result
+}
+
+func (ss StringSlice) FilterNot(f func(string) bool) StringSlice {
+	return ss.Filter(func(s string) bool {
+		return !f(s)
+	})
+}
+
+func (ss StringSlice) PurgeZero() StringSlice {
+	return ss.Filter(func(s string) bool {
+		return s != ""
+	})
+}
+
+func (ss StringSlice) split(sep string) StringSlice {
+	result := make(StringSlice, 0, len(ss))
+
+	for _, s := range ss {
+		for _, sub := range strings.Split(s, sep) {
+			result = result.Append(sub)
+		}
+	}
+
+	return result
+}
+
+func (ss StringSlice) Split(seps ...string) StringSlice {
+	for _, sep := range seps {
+		ss = ss.split(sep)
+	}
+	return ss
 }
 
 func (ss StringSlice) Join(sep string) string {

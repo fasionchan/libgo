@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-02-09 10:16:51
  * Last Modified by: fasion
- * Last Modified time: 2021-05-28 08:49:31
+ * Last Modified time: 2021-05-31 09:12:04
  */
 
 package goutil
@@ -14,7 +14,11 @@ import (
 
 type StringSlice []string
 
-func NewStringSlice(ss []string) StringSlice {
+func NewStringSlice(ss ...string) StringSlice {
+	return StringSlice(ss)
+}
+
+func NewStringSliceFromStrings(ss []string) StringSlice {
 	return StringSlice(ss)
 }
 

@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-02-09 10:16:51
  * Last Modified by: fasion
- * Last Modified time: 2021-05-31 09:12:04
+ * Last Modified time: 2021-06-02 09:06:06
  */
 
 package goutil
@@ -105,6 +105,10 @@ func (ss StringSlice) Concat(others ...StringSlice) StringSlice {
 
 func (ss StringSlice) Len() int {
 	return len(ss)
+}
+
+func (ss StringSlice) Empty() bool {
+	return ss.Len() == 0
 }
 
 func (ss StringSlice) Less(i, j int) bool {
@@ -324,3 +328,20 @@ func (a StringSet) Intersection(b StringSet) StringSet {
 }
 
 type StringSets []StringSet
+
+type CounterByStringKey map[string]int
+
+func NewCounterByStringKey() CounterByStringKey {
+	return CounterByStringKey{}
+}
+
+func (counter CounterByStringKey) Increase(key string) {
+	counter[key]++
+}
+
+func (counter CounterByStringKey) SumKeys(keys ...string) (total int) {
+	for _, key := range keys {
+		total += counter[key]
+	}
+	return
+}

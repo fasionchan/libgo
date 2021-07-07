@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-02-09 10:16:51
  * Last Modified by: fasion
- * Last Modified time: 2021-06-02 09:06:06
+ * Last Modified time: 2021-07-07 08:55:10
  */
 
 package goutil
@@ -20,6 +20,14 @@ func NewStringSlice(ss ...string) StringSlice {
 
 func NewStringSliceFromStrings(ss []string) StringSlice {
 	return StringSlice(ss)
+}
+
+func (ss StringSlice) TrueMapping() BoolMappingByString {
+	return NewBoolMappingByString().BatchSet(true, ss...)
+}
+
+func (ss StringSlice) FalseMapping() BoolMappingByString {
+	return NewBoolMappingByString().BatchSet(false, ss...)
 }
 
 func (ss StringSlice) ToSet() StringSet {

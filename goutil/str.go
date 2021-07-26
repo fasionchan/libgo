@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-02-09 10:16:51
  * Last Modified by: fasion
- * Last Modified time: 2021-07-07 08:55:10
+ * Last Modified time: 2021-07-26 16:06:42
  */
 
 package goutil
@@ -93,6 +93,12 @@ func (ss StringSlice) Split(seps ...string) StringSlice {
 
 func (ss StringSlice) Join(sep string) string {
 	return strings.Join(ss.Strings(), sep)
+}
+
+func (ss StringSlice) ToAtString() string {
+	return ss.Map(func(s string) string {
+		return "@" + s
+	}).Join(" ")
 }
 
 func (ss StringSlice) Dup() StringSlice {
@@ -334,6 +340,23 @@ func (a StringSet) Intersection(b StringSet) StringSet {
 	}
 	return result
 }
+
+type StringSliceMappingByString map[string]StringSlice
+
+func (m StringSliceMappingByString) StringMapping() StringMappingByString {
+	result := StringMappingByString{}
+	for key, values := range m {
+		n := values.Len()
+		if n == 0 {
+			continue
+		}
+
+		result[key] = values[n-1]
+	}
+	return result
+}
+
+type StringMappingByString map[string]string
 
 type StringSets []StringSet
 

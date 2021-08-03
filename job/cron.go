@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-03-10 09:19:12
  * Last Modified by: fasion
- * Last Modified time: 2021-05-13 11:17:30
+ * Last Modified time: 2021-08-03 11:17:40
  */
 
 package job
@@ -25,8 +25,9 @@ type CronJobRunner struct {
 	schedule cron.Schedule
 	job      CronJob
 
-	lastTickTime time.Time
-	nextTickTime time.Time
+	processAtOnce bool
+	lastTickTime  time.Time
+	nextTickTime  time.Time
 }
 
 func NewCronJobRunner(job CronJob, spec string) (*CronJobRunner, error) {
@@ -51,6 +52,11 @@ func NewCronJobRunner(job CronJob, spec string) (*CronJobRunner, error) {
 	return &runner, nil
 }
 
+func (runner *CronJobRunner) WithProcessAtOnce(value bool) *CronJobRunner {
+	runner.processAtOnce = value
+	return runner
+}
+
 func (runner *CronJobRunner) Process() {
 	// call prepare
 	if runner.job.IsCanceled() {
@@ -58,6 +64,16 @@ func (runner *CronJobRunner) Process() {
 	}
 	if !runner.job.Prepare() {
 		return
+	}
+
+	// first process at once
+	if runner.processAtOnce {
+		if runner.job.IsCanceled() {
+			return
+		}
+		if !runner.job.Process() {
+			return
+		}
 	}
 
 	runner.lastTickTime = time.Now()

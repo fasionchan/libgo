@@ -2,10 +2,10 @@
  * Author: fasion
  * Created time: 2019-08-15 16:25:59
  * Last Modified by: fasion
- * Last Modified time: 2019-08-15 17:52:50
+ * Last Modified time: 2021-08-31 09:45:42
  */
 
-package os
+package osutil
 
 import (
 	"syscall"

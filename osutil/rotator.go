@@ -4,38 +4,38 @@
  * Author: fasion
  * Created time: 2019-05-27 13:18:54
  * Last Modified by: fasion
- * Last Modified time: 2019-08-19 15:09:00
+ * Last Modified time: 2021-08-31 09:45:44
  */
 
-package os
+package osutil
 
 import (
+	"compress/gzip"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
-	"compress/gzip"
 )
 
 type SizedFileRotator struct {
-	Fd int
-	Path string
-	Size int64
-	Backups int
-	Duration time.Duration
+	Fd            int
+	Path          string
+	Size          int64
+	Backups       int
+	Duration      time.Duration
 	CheckDuration time.Duration
-	mutex sync.Mutex
+	mutex         sync.Mutex
 }
 
 func NewSizedFileRotator(fd int, path string, size int64, backups int, duration time.Duration, checkDuration time.Duration) (*SizedFileRotator, error) {
 	rotator := &SizedFileRotator{
-		Fd: fd,
-		Path: path,
-		Size: size,
-		Backups: backups,
-		Duration: duration,
+		Fd:            fd,
+		Path:          path,
+		Size:          size,
+		Backups:       backups,
+		Duration:      duration,
 		CheckDuration: checkDuration,
 	}
 
@@ -48,11 +48,11 @@ func NewSizedFileRotator(fd int, path string, size int64, backups int, duration 
 	return rotator, nil
 }
 
-func (self *SizedFileRotator) createDup() (error) {
-	return DupTo(self.Path, os.O_CREATE | os.O_WRONLY | os.O_APPEND, 0644, self.Fd)
+func (self *SizedFileRotator) createDup() error {
+	return DupTo(self.Path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644, self.Fd)
 }
 
-func (self *SizedFileRotator) RotateIfNeeded() (error) {
+func (self *SizedFileRotator) RotateIfNeeded() error {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
@@ -115,7 +115,7 @@ func (self *SizedFileRotator) RotateIfNeeded() (error) {
 	}
 	defer frFile.Close()
 
-	toFile, err := os.OpenFile(backupName + ".gz", os.O_CREATE | os.O_TRUNC | os.O_WRONLY, 0644)
+	toFile, err := os.OpenFile(backupName+".gz", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}

@@ -2,10 +2,10 @@
  * Author: fasion
  * Created time: 2019-05-27 09:46:53
  * Last Modified by: fasion
- * Last Modified time: 2019-06-26 12:27:51
+ * Last Modified time: 2021-08-31 09:45:37
  */
 
-package os
+package osutil
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 
 type EnvironMap map[string]string
 
-func (self EnvironMap) Copy() (EnvironMap) {
+func (self EnvironMap) Copy() EnvironMap {
 	copy := EnvironMap{}
 
 	for key, value := range self {

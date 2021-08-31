@@ -4,10 +4,10 @@
  * Author: fasion
  * Created time: 2019-05-27 08:10:08
  * Last Modified by: fasion
- * Last Modified time: 2019-12-03 09:54:01
+ * Last Modified time: 2021-08-31 09:45:39
  */
 
-package os
+package osutil
 
 import (
 	"os"

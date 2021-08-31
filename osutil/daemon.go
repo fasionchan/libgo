@@ -4,10 +4,10 @@
  * Author: fasion
  * Created time: 2019-05-26 20:37:05
  * Last Modified by: fasion
- * Last Modified time: 2019-12-23 10:24:46
+ * Last Modified time: 2021-08-31 09:45:34
  */
 
-package os
+package osutil
 
 import (
 	"fmt"

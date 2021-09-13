@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-02-09 10:16:51
  * Last Modified by: fasion
- * Last Modified time: 2021-07-26 16:06:42
+ * Last Modified time: 2021-09-13 09:31:22
  */
 
 package goutil
@@ -41,6 +41,13 @@ func (ss StringSlice) Strings() []string {
 	// 	result = append(result, s)
 	// }
 	// return result
+}
+
+func (ss StringSlice) ForEach(f func(string, int, StringSlice)) StringSlice {
+	for i, s := range ss {
+		f(s, i, ss)
+	}
+	return ss
 }
 
 func (ss StringSlice) Map(f func(string) string) StringSlice {

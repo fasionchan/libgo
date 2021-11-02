@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-10-22 13:54:11
  * Last Modified by: fasion
- * Last Modified time: 2021-10-25 10:15:20
+ * Last Modified time: 2021-11-01 13:42:06
  */
 
 package goutil
@@ -10,6 +10,7 @@ package goutil
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -49,8 +50,19 @@ func (t *IntraDayTime) UnmarshalJSON(data []byte) error {
 	}
 
 	var hours, minutes, seconds, nanoseconds time.Duration
-	if _, err := fmt.Sscanf(s, "%d:%d:%d.%d", &hours, &minutes, &seconds, &nanoseconds); err != nil {
+
+	var parts = strings.Split(s, ".")
+	if _, err := fmt.Sscanf(parts[0], "%d:%d:%d", &hours, &minutes, &seconds); err != nil {
 		return err
+	}
+
+	// parse nanosecond if any
+	if len(parts) > 1 {
+		if ns := parts[1]; ns != "" {
+			if _, err := fmt.Sscanf(ns, "%d", &nanoseconds); err != nil {
+				return err
+			}
+		}
 	}
 
 	*t = IntraDayTime(hours*time.Hour + minutes*time.Minute + seconds*time.Second + nanoseconds*time.Nanosecond)

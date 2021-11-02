@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-10-25 09:46:57
  * Last Modified by: fasion
- * Last Modified time: 2021-10-25 10:17:01
+ * Last Modified time: 2021-11-01 13:42:51
  */
 
 package goutil
@@ -29,6 +29,12 @@ var IntraDayTimeJsonCases = []struct {
 }
 
 func TestMarshalIntraDayTime(t *testing.T) {
+	var idt IntraDayTime
+	err := json.Unmarshal([]byte(`"11:00:00"`), &idt)
+	if err != nil {
+		t.Error(err)
+	}
+
 	for _, data := range IntraDayTimeJsonCases {
 		j, err := json.Marshal(data.t)
 		if err != nil {

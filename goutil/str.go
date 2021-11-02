@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-02-09 10:16:51
  * Last Modified by: fasion
- * Last Modified time: 2021-09-13 09:31:22
+ * Last Modified time: 2021-11-02 14:12:00
  */
 
 package goutil
@@ -41,6 +41,24 @@ func (ss StringSlice) Strings() []string {
 	// 	result = append(result, s)
 	// }
 	// return result
+}
+
+func (ss StringSlice) AnyMatch(f func(string) bool) bool {
+	for _, s := range ss {
+		if f(s) {
+			return true
+		}
+	}
+	return false
+}
+
+func (ss StringSlice) AllMatch(f func(string) bool) bool {
+	for _, s := range ss {
+		if !f(s) {
+			return false
+		}
+	}
+	return true
 }
 
 func (ss StringSlice) ForEach(f func(string, int, StringSlice)) StringSlice {

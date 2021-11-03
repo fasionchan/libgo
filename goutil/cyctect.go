@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-07-01 18:50:08
  * Last Modified by: fasion
- * Last Modified time: 2021-07-02 14:36:48
+ * Last Modified time: 2021-11-03 14:42:41
  */
 
 package goutil
@@ -149,8 +149,20 @@ func (path cyclePath) ReadableString() string {
 
 type cyclePathes []*cyclePath
 
+func (pathes cyclePathes) Print() {
+	fmt.Println(pathes.ReadableStrings())
+}
+
 func (pathes cyclePathes) Len() int {
 	return len(pathes)
+}
+
+func (pathes cyclePathes) Limit(n int) cyclePathes {
+	if pathes.Len() <= n {
+		return pathes
+	}
+
+	return pathes[:n]
 }
 
 func (pathes cyclePathes) Empty() bool {
@@ -296,4 +308,12 @@ func DetectCycle(v interface{}) (result cyclePathes, err error) {
 	err = detector.Detect(v)
 	result = detector.cyclePathes
 	return
+}
+
+func MustDetectCycle(v interface{}) cyclePathes {
+	result, err := DetectCycle(v)
+	if err != nil {
+		panic(err)
+	}
+	return result
 }

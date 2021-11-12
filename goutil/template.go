@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-10-12 19:21:32
  * Last Modified by: fasion
- * Last Modified time: 2021-10-12 19:47:21
+ * Last Modified time: 2021-11-12 10:13:28
  */
 
 package goutil
@@ -42,6 +42,6 @@ var TemplateHelpers = TemplateFuncMap{
 			return data
 		}
 
-		return value.Slice(0, n)
+		return value.Slice(0, n).Interface()
 	},
 }

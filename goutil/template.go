@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-10-12 19:21:32
  * Last Modified by: fasion
- * Last Modified time: 2021-11-12 10:13:28
+ * Last Modified time: 2021-11-19 16:19:30
  */
 
 package goutil
@@ -10,6 +10,7 @@ package goutil
 import (
 	"reflect"
 	"text/template"
+	"time"
 )
 
 type TemplateFuncMap template.FuncMap
@@ -43,5 +44,16 @@ var TemplateHelpers = TemplateFuncMap{
 		}
 
 		return value.Slice(0, n).Interface()
+	},
+	"timefmt": func(t time.Time, fmt string, zeroPlaceHolder string) string {
+		if t.IsZero() {
+			return zeroPlaceHolder
+		}
+
+		if fmt == "" {
+			fmt = DefaultTimeFormat
+		}
+
+		return t.Format(fmt)
 	},
 }

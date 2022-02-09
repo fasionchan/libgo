@@ -2,12 +2,13 @@
  * Author: fasion
  * Created time: 2021-10-12 19:21:32
  * Last Modified by: fasion
- * Last Modified time: 2021-11-19 16:19:30
+ * Last Modified time: 2022-02-09 09:11:51
  */
 
 package goutil
 
 import (
+	"encoding/json"
 	"reflect"
 	"text/template"
 	"time"
@@ -55,5 +56,9 @@ var TemplateHelpers = TemplateFuncMap{
 		}
 
 		return t.Format(fmt)
+	},
+	"jsonify": func(v interface{}) (string, error) {
+		data, err := json.Marshal(v)
+		return string(data), err
 	},
 }

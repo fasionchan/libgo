@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-10-12 19:21:32
  * Last Modified by: fasion
- * Last Modified time: 2022-03-02 08:37:22
+ * Last Modified time: 2022-03-03 17:14:09
  */
 
 package goutil
@@ -46,9 +46,10 @@ var TemplateHelpers = TemplateFuncMap{
 
 		return value.Slice(0, n).Interface()
 	},
-	"now":   time.Now,
-	"today": Today,
-	"dayOf": DayOf,
+	"now":      time.Now,
+	"today":    Today,
+	"dayOf":    DayOf,
+	"duration": time.ParseDuration,
 	"timefmt": func(t time.Time, fmt string, zeroPlaceHolder string) string {
 		if t.IsZero() {
 			return zeroPlaceHolder

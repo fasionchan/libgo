@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-10-12 19:21:32
  * Last Modified by: fasion
- * Last Modified time: 2022-03-03 17:14:09
+ * Last Modified time: 2022-03-07 14:35:51
  */
 
 package goutil
@@ -31,6 +31,29 @@ func (m TemplateFuncMap) Dup() TemplateFuncMap {
 func (m TemplateFuncMap) With(key string, f interface{}) TemplateFuncMap {
 	m[key] = f
 	return m
+}
+
+func (m TemplateFuncMap) WithDataContainer(name string) *DataContainer {
+	container := NewDataContainer()
+	m["set"+name] = container.Set
+	return container
+}
+
+func (m TemplateFuncMap) WithDataContainers(names ...string) DataContainers {
+	containers := make(DataContainers, 0, len(names))
+	for _, name := range names {
+		containers = containers.Append(m.WithDataContainer(name))
+	}
+	return containers
+}
+
+func (m TemplateFuncMap) WithDataContainersForMapping(names ...string) DataContainerMappingByString {
+	containers := m.WithDataContainers(names...)
+	mapping := DataContainerMappingByString{}
+	for i, name := range names {
+		mapping[name] = containers[i]
+	}
+	return mapping
 }
 
 var TemplateHelpers = TemplateFuncMap{
@@ -66,3 +89,28 @@ var TemplateHelpers = TemplateFuncMap{
 		return string(data), err
 	},
 }
+
+type DataContainer struct {
+	d interface{}
+}
+
+func NewDataContainer() *DataContainer {
+	return &DataContainer{}
+}
+
+func (c *DataContainer) Get() interface{} {
+	return c.d
+}
+
+func (c *DataContainer) Set(d interface{}) *DataContainer {
+	c.d = d
+	return c
+}
+
+type DataContainers []*DataContainer
+
+func (containers DataContainers) Append(others ...*DataContainer) DataContainers {
+	return append(containers, others...)
+}
+
+type DataContainerMappingByString map[string]*DataContainer

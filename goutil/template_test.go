@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-11-18 09:34:42
  * Last Modified by: fasion
- * Last Modified time: 2021-11-19 16:19:48
+ * Last Modified time: 2022-03-08 12:05:17
  */
 
 package goutil
@@ -65,4 +65,21 @@ func TestTimeFormatTempalteHelper(t *testing.T) {
 			t.Fatalf("`%s` expected but got `%s`", item.result, result)
 		}
 	}
+}
+
+func TestMapHelpers(t *testing.T) {
+	result, err := renderTemplate(`{{ $m := makeMap "" (int64 0) }}
+{{ setMap $m "test" (addInt64 (index $m "test") 10) }}
+{{ printf "%v: %T\n" $m $m }}
+{{ jsonify $m }}
+{{ $nums := (jsondecode "[0, 1, 1.2, 1.999999999999999999999999999999999]") }}
+{{ range $_, $num := $nums }}{{ printf "%v: %T\n" $num $num }}{{ end }}
+{{ $i := convert (index $nums 3) "int" }}
+{{ printf "%v: %T\n" $i $i }}
+{{ addInt 0 1.1 1.999999999999999999999999999999999999 }}
+`, nil, TemplateHelpers.Native())
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(result)
 }

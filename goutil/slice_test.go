@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-05-14 09:27:21
  * Last Modified by: fasion
- * Last Modified time: 2021-11-02 18:53:29
+ * Last Modified time: 2022-03-10 14:58:38
  */
 
 package goutil
@@ -11,6 +11,14 @@ import (
 	"fmt"
 	"testing"
 )
+
+func TestDataSlice(t *testing.T) {
+	src := DataSlice{1, 2, 3}
+	var nums []int
+	pnums := &nums
+	src.ConvertTo(&pnums)
+	fmt.Println(nums)
+}
 
 func TestDupSlice(t *testing.T) {
 	src := []string{"a", "b", "c"}

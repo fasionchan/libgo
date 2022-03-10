@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-10-12 19:21:32
  * Last Modified by: fasion
- * Last Modified time: 2022-03-07 14:35:51
+ * Last Modified time: 2022-03-08 12:05:00
  */
 
 package goutil
@@ -88,6 +88,35 @@ var TemplateHelpers = TemplateFuncMap{
 		data, err := json.Marshal(v)
 		return string(data), err
 	},
+	"jsondecode": func(j string) (interface{}, error) {
+		var data interface{}
+		if err := json.Unmarshal([]byte(j), &data); err != nil {
+			return nil, err
+		}
+		return data, nil
+	},
+	"makeMap": func(k interface{}, v interface{}) interface{} {
+		return reflect.MakeMap(reflect.MapOf(reflect.TypeOf(k), reflect.TypeOf(v))).Interface()
+	},
+	"setMap": func(m interface{}, k interface{}, v interface{}) interface{} {
+		reflect.ValueOf(m).SetMapIndex(reflect.ValueOf(k), reflect.ValueOf(v))
+		return m
+	},
+
+	"convert": Convert,
+	"int": func(v interface{}) interface{} {
+		return Convert(v, "int")
+	},
+	"int64": func(v interface{}) interface{} {
+		return Convert(v, "int64")
+	},
+	"float64": func(v interface{}) interface{} {
+		return Convert(v, "float64")
+	},
+
+	"addInt":     AddToInt,
+	"addInt64":   AddToInt64,
+	"addFloat64": AddToFloat64,
 }
 
 type DataContainer struct {

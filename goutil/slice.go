@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-05-14 09:24:27
  * Last Modified by: fasion
- * Last Modified time: 2021-11-02 18:53:09
+ * Last Modified time: 2022-03-10 14:57:19
  */
 
 package goutil
@@ -10,6 +10,47 @@ package goutil
 import (
 	"reflect"
 )
+
+type DataSlice []interface{}
+
+func (datas DataSlice) Append(others ...interface{}) DataSlice {
+	return append(datas, others...)
+}
+
+func (datas DataSlice) ConvertTo(dst interface{}) error {
+	dstValue := reflect.ValueOf(dst)
+	dstType := dstValue.Type()
+
+	var ptrValue reflect.Value
+	for dstType.Kind() == reflect.Ptr {
+		ptrValue = dstValue
+		dstValue = dstValue.Elem()
+		dstType = dstValue.Type()
+	}
+
+	if dstType.Kind() != reflect.Slice {
+		return nil
+	}
+
+	dataType := dstType.Elem()
+	for i, data := range datas {
+		dataValue := reflect.ValueOf(data)
+
+		if i == 0 {
+			if dataValue.Type() != dataType {
+				return nil
+			}
+		}
+
+		dstValue = reflect.Append(dstValue, dataValue)
+	}
+
+	if ptrValue.IsValid() {
+		ptrValue.Elem().Set(dstValue)
+	}
+
+	return nil
+}
 
 func DupSlice(src, dst interface{}) {
 	// dst should be a pointer to slice

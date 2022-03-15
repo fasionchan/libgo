@@ -2,13 +2,15 @@
  * Author: fasion
  * Created time: 2019-05-13 13:50:47
  * Last Modified by: fasion
- * Last Modified time: 2020-11-24 14:59:45
+ * Last Modified time: 2022-03-15 09:44:33
  */
 
 package job
 
 import (
 	"time"
+
+	"go.uber.org/zap"
 )
 
 type PeriodJob interface {
@@ -90,6 +92,11 @@ START_SCHEDULING:
 PERIOD_RUNNER_LOOP:
 	for {
 		curTime = time.Now()
+
+		runner.Info("PeriodRunnerScheduling",
+			zap.String("Ident", runner.job.GetJobIdent()),
+			zap.Time("NextTime", runner.nextTickTime),
+		)
 
 		if curTime.Before(runner.nextTickTime) {
 			// not right now, waiting

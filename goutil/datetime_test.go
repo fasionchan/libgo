@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-10-25 09:46:57
  * Last Modified by: fasion
- * Last Modified time: 2021-11-01 13:42:51
+ * Last Modified time: 2022-03-22 12:39:43
  */
 
 package goutil
@@ -58,6 +58,37 @@ func TestUnMarshalIntraDayTime(t *testing.T) {
 
 		if idt != data.t {
 			t.Errorf("%d and %d is not the same", idt, data.t)
+		}
+	}
+}
+
+var IntraDayTimeFormatCases = []struct {
+	t IntraDayTime
+	f string
+	r string
+}{
+	{
+		t: MustParseIntraDayTime("01:02:03.999999999"),
+		f: "15:04",
+		r: "01:02",
+	},
+	{
+		t: MustParseIntraDayTime("01:02:03.999999999"),
+		f: "04:05",
+		r: "02:03",
+	},
+	{
+		t: MustParseFormattedIntraDayTime("15-04-05", "01-02-03"),
+		f: "15:04:05",
+		r: "01:02:03",
+	},
+}
+
+func TestFormatIntraDayTime(t *testing.T) {
+	for _, data := range IntraDayTimeFormatCases {
+		r := data.t.Format(data.f)
+		if r != data.r {
+			t.Errorf("%s and %s is not the same", r, data.r)
 		}
 	}
 }

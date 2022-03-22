@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-10-22 13:54:11
  * Last Modified by: fasion
- * Last Modified time: 2021-11-19 16:19:33
+ * Last Modified time: 2022-03-22 12:42:24
  */
 
 package goutil
@@ -30,13 +30,79 @@ func Today() time.Time {
 	return DayOf(time.Now().Local())
 }
 
+func ReadableDuration(d time.Duration) string {
+	return ""
+}
+
 type IntraDayTime time.Duration
+
+func ParseIntraDayTime(s string) (IntraDayTime, error) {
+	var hours, minutes, seconds, nanoseconds time.Duration
+
+	var parts = strings.Split(s, ".")
+	if _, err := fmt.Sscanf(parts[0], "%d:%d:%d", &hours, &minutes, &seconds); err != nil {
+		return 0, err
+	}
+
+	// parse nanosecond if any
+	if len(parts) > 1 {
+		if ns := parts[1]; ns != "" {
+			if _, err := fmt.Sscanf(ns, "%d", &nanoseconds); err != nil {
+				return 0, err
+			}
+		}
+	}
+
+	return IntraDayTime(hours*time.Hour + minutes*time.Minute + seconds*time.Second + nanoseconds*time.Nanosecond), nil
+}
+
+func MustParseIntraDayTime(s string) IntraDayTime {
+	t, err := ParseIntraDayTime(s)
+	if err != nil {
+		panic(err)
+	}
+
+	return t
+}
+
+func ParseFormattedIntraDayTime(layout, value string) (IntraDayTime, error) {
+	t, err := time.Parse(layout, value)
+	if err != nil {
+		return 0, err
+	}
+
+	r := IntraDayTime(time.Hour)*IntraDayTime(t.Hour()) +
+		IntraDayTime(time.Minute)*IntraDayTime(t.Minute()) +
+		IntraDayTime(time.Second)*IntraDayTime(t.Second()) +
+		IntraDayTime(time.Nanosecond)*IntraDayTime(t.Nanosecond())
+
+	return r, nil
+}
+
+func MustParseFormattedIntraDayTime(layout, value string) IntraDayTime {
+	t, err := ParseFormattedIntraDayTime(layout, value)
+	if err != nil {
+		panic(err)
+	}
+
+	return t
+}
 
 func (t IntraDayTime) Duration() time.Duration {
 	return time.Duration(t)
 }
 
-func (t IntraDayTime) MarshalJSON() ([]byte, error) {
+func (t IntraDayTime) String() string {
+	hours, minutes, seconds, nanoseconds := t.Parts()
+	return fmt.Sprintf("%02d:%02d:%02d.%09d", hours, minutes, seconds, nanoseconds)
+}
+
+func (t IntraDayTime) Format(layout string) string {
+	hours, minutes, seconds, nanoseconds := t.Parts()
+	return time.Date(0, 0, 0, hours, minutes, seconds, nanoseconds, time.Local).Format(layout)
+}
+
+func (t IntraDayTime) Parts() (int, int, int, int) {
 	d := time.Duration(t)
 
 	hours := d / time.Hour
@@ -48,7 +114,11 @@ func (t IntraDayTime) MarshalJSON() ([]byte, error) {
 	seconds := d / time.Second
 	d -= seconds * time.Second
 
-	return json.Marshal(fmt.Sprintf("%02d:%02d:%02d.%09d", hours, minutes, seconds, d))
+	return int(hours), int(minutes), int(seconds), int(d)
+}
+
+func (t IntraDayTime) MarshalJSON() ([]byte, error) {
+	return json.Marshal(t.String())
 }
 
 func (t *IntraDayTime) UnmarshalJSON(data []byte) error {
@@ -57,23 +127,12 @@ func (t *IntraDayTime) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	var hours, minutes, seconds, nanoseconds time.Duration
-
-	var parts = strings.Split(s, ".")
-	if _, err := fmt.Sscanf(parts[0], "%d:%d:%d", &hours, &minutes, &seconds); err != nil {
+	parsed, err := ParseIntraDayTime(s)
+	if err != nil {
 		return err
 	}
 
-	// parse nanosecond if any
-	if len(parts) > 1 {
-		if ns := parts[1]; ns != "" {
-			if _, err := fmt.Sscanf(ns, "%d", &nanoseconds); err != nil {
-				return err
-			}
-		}
-	}
-
-	*t = IntraDayTime(hours*time.Hour + minutes*time.Minute + seconds*time.Second + nanoseconds*time.Nanosecond)
+	*t = parsed
 
 	return nil
 }

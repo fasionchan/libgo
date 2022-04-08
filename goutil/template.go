@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-10-12 19:21:32
  * Last Modified by: fasion
- * Last Modified time: 2022-03-08 12:05:00
+ * Last Modified time: 2022-04-08 14:41:45
  */
 
 package goutil
@@ -10,6 +10,7 @@ package goutil
 import (
 	"encoding/json"
 	"reflect"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -117,6 +118,10 @@ var TemplateHelpers = TemplateFuncMap{
 	"addInt":     AddToInt,
 	"addInt64":   AddToInt64,
 	"addFloat64": AddToFloat64,
+
+	"split": func(s string, sep string) StringSlice {
+		return strings.Split(s, sep)
+	},
 }
 
 type DataContainer struct {

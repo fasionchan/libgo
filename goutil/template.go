@@ -2,13 +2,14 @@
  * Author: fasion
  * Created time: 2021-10-12 19:21:32
  * Last Modified by: fasion
- * Last Modified time: 2022-04-08 14:41:45
+ * Last Modified time: 2022-04-25 16:28:17
  */
 
 package goutil
 
 import (
 	"encoding/json"
+	"net/http"
 	"reflect"
 	"strings"
 	"text/template"
@@ -70,10 +71,11 @@ var TemplateHelpers = TemplateFuncMap{
 
 		return value.Slice(0, n).Interface()
 	},
-	"now":      time.Now,
-	"today":    Today,
-	"dayOf":    DayOf,
-	"duration": time.ParseDuration,
+	"now":          time.Now,
+	"today":        Today,
+	"dayOf":        DayOf,
+	"duration":     time.ParseDuration,
+	"intraDayTime": ParseIntraDayTime,
 	"timefmt": func(t time.Time, fmt string, zeroPlaceHolder string) string {
 		if t.IsZero() {
 			return zeroPlaceHolder
@@ -102,6 +104,20 @@ var TemplateHelpers = TemplateFuncMap{
 	"setMap": func(m interface{}, k interface{}, v interface{}) interface{} {
 		reflect.ValueOf(m).SetMapIndex(reflect.ValueOf(k), reflect.ValueOf(v))
 		return m
+	},
+	"httpGetJson": func(url string) (interface{}, error) {
+		response, err := http.Get(url)
+		if err != nil {
+			return nil, err
+		}
+		defer response.Body.Close()
+
+		var data interface{}
+		if err := json.NewDecoder(response.Body).Decode(&data); err != nil {
+			return nil, err
+		}
+
+		return data, nil
 	},
 
 	"convert": Convert,

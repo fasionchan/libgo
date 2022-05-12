@@ -2,13 +2,14 @@
  * Author: fasion
  * Created time: 2021-10-12 19:21:32
  * Last Modified by: fasion
- * Last Modified time: 2022-04-25 16:28:17
+ * Last Modified time: 2022-05-10 16:13:06
  */
 
 package goutil
 
 import (
 	"encoding/json"
+	"math"
 	"net/http"
 	"reflect"
 	"strings"
@@ -135,8 +136,22 @@ var TemplateHelpers = TemplateFuncMap{
 	"addInt64":   AddToInt64,
 	"addFloat64": AddToFloat64,
 
+	"hasSubstr": strings.Contains,
+	"hasPrefix": strings.HasPrefix,
+	"hasSuffix": strings.HasSuffix,
+	"join":      strings.Join,
 	"split": func(s string, sep string) StringSlice {
 		return strings.Split(s, sep)
+	},
+	"toLower":       strings.ToLower,
+	"toUpper":       strings.ToUpper,
+	"replaceSubstr": strings.ReplaceAll,
+	"trim":          strings.Trim,
+	"trimSpace":     strings.TrimSpace,
+
+	"abs": math.Abs,
+	"toStringSlice": func(s []string) StringSlice {
+		return s
 	},
 }
 

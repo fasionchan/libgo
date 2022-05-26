@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-10-12 19:21:32
  * Last Modified by: fasion
- * Last Modified time: 2022-05-10 16:13:06
+ * Last Modified time: 2022-05-26 08:56:40
  */
 
 package goutil
@@ -19,16 +19,23 @@ import (
 
 type TemplateFuncMap template.FuncMap
 
+func NewTemplateFuncMap() TemplateFuncMap {
+	return TemplateFuncMap{}
+}
+
 func (m TemplateFuncMap) Native() template.FuncMap {
 	return template.FuncMap(m)
 }
 
 func (m TemplateFuncMap) Dup() TemplateFuncMap {
-	result := TemplateFuncMap{}
-	for k, v := range m {
-		result[k] = v
+	return NewTemplateFuncMap().Merge(m)
+}
+
+func (m TemplateFuncMap) Merge(other TemplateFuncMap) TemplateFuncMap {
+	for k, v := range other {
+		m[k] = v
 	}
-	return result
+	return m
 }
 
 func (m TemplateFuncMap) With(key string, f interface{}) TemplateFuncMap {

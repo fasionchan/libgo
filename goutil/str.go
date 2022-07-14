@@ -2,7 +2,7 @@
  * Author: fasion
  * Created time: 2021-02-09 10:16:51
  * Last Modified by: fasion
- * Last Modified time: 2021-11-02 14:12:00
+ * Last Modified time: 2022-06-28 11:34:47
  */
 
 package goutil
@@ -73,6 +73,10 @@ func (ss StringSlice) Map(f func(string) string) StringSlice {
 		ss[i] = f(s)
 	}
 	return ss
+}
+
+func (ss StringSlice) TrimSpace() StringSlice {
+	return ss.Map(strings.TrimSpace)
 }
 
 func (ss StringSlice) Filter(f func(string) bool) StringSlice {
